@@ -18,14 +18,18 @@ exports.s3Uploadv2 = async (files) => {
     
 }
 
-exports.s3Uploadv3 = async (file) => {
+exports.s3Uploadv3 = async (files) => {
     const s3client = new S3Client()
 
-    const param = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: `uploads/${uuid()}-${file.originalname}`,
-        Body: file.buffer,
-    }
+    const params = files.map(file => {
+        return {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: `uploads/${uuid()}-${file.originalname}`,
+            Body: file.buffer,
+        }
+    })
 
-    return s3client.send(new PutObjectCommand(param))
+    return await Promise.all(params.map(param => s3client.send(new PutObjectCommand(param))))
+
+
 }
