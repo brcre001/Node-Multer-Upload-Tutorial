@@ -1,7 +1,7 @@
 require("dotenv").config()
 const express = require("express")
 const multer = require("multer")
-const { s3Uploadv2 } = require("./s3Service")
+const { s3Uploadv2, s3Uploadv3 } = require("./s3Service")
 const uuid = require("uuid").v4
 const app = express()
 
@@ -50,9 +50,25 @@ const fileFilter = (req, file, cb) => {
 }
 
 const upload = multer({storage, fileFilter, limits: { fileSize: 10000000 }})
+
+// For use with version 2
+
+// app.post("/upload", upload.array("file") , async (req,res) => {
+//     try {
+//         const results = await s3Uploadv2(req.files)
+//         console.log(results)
+//         res.json({status: "success"})
+//     } catch (err) {
+//         console.log(err)
+//     }
+// });
+
+// For use with version 3
+
 app.post("/upload", upload.array("file") , async (req,res) => {
+    const file = req.files[0]
     try {
-        const results = await s3Uploadv2(req.files)
+        const results = await s3Uploadv3(req.files)
         console.log(results)
         res.json({status: "success"})
     } catch (err) {
